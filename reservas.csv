@@ -1,1 +1,5 @@
-﻿usuario,fecha-viaje,tipo,cantidad-boletos,aerolinea,numero-tarjeta,numero-asiento,cantidad-maletas
+﻿usuario,fecha-viaje,tipo,cantidad-boletos,aerolinea,numero-tarjeta
+Esteban,2023-11-11,Solo ida,23,Iberia
+Esteban,2023-11-23,Ida y vuelta,29,Avianca
+Esteban,2023-11-23,Solo ida,33,Mexican
+Zusan,2023-11-23,Ida y vuelta,2,Avianca

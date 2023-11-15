@@ -7,16 +7,17 @@ import java.util.*;
 
 public class Kayak{
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         int menu=0, opc=0;
         Scanner scanner = new Scanner(System.in);
-        boolean contiuar=true, confirmado,loggedIn=false,doReserva=true;
+        boolean contiuar=true, confirmado,loggedIn=false,doReserva;
         Usuario usuario =null;
         String tipoPlan;
-        File nombreFile = new File("usuarios.csv");
+        File usuariosFile = new File("usuarios.csv") , reservasFile = new File("reservas.csv");
         ArrayList<Usuario> usuarios = new ArrayList<Usuario>();
 
-        abrirCSV( "usuarios.csv",  nombreFile);
+        abrirCSV( "usuarios.csv",  usuariosFile);
+        abrirCSV( "reservas.csv",  reservasFile);
 
         while (contiuar) {
             iniciarOCrear();
@@ -61,7 +62,7 @@ public class Kayak{
 
                         String[] datosUsuario = {usuario.getNombre(),usuario.getPassword()};
 
-                        try (BufferedWriter wr = new BufferedWriter(new FileWriter(nombreFile,true))){
+                        try (BufferedWriter wr = new BufferedWriter(new FileWriter(usuariosFile,true))){
                     
                             StringBuilder linea = new StringBuilder();
                     
@@ -107,7 +108,7 @@ public class Kayak{
                     contrasenia = scanner.nextLine();
                     
         
-                    String[] datosUsuario = autenticarUsuario(nombreUsuario, contrasenia,nombreFile);
+                    String[] datosUsuario = autenticarUsuario(nombreUsuario, contrasenia,usuariosFile);
 
                     if (datosUsuario!=null) {
                         loggedIn = true;
@@ -138,6 +139,7 @@ public class Kayak{
                             }
                             switch (menu) {
                                 case 1: //reserva
+                                    doReserva=true;
                                     while (doReserva) {
                                         String fechaString, tipoVuelo,aerolinea;
                                         LocalDate fechaViaje;
@@ -169,6 +171,31 @@ public class Kayak{
                                         doReserva=volverAlMenu(scanner, " a ingresar otra reserva? ");
                                         
                                     }
+
+                                    try (BufferedReader reader = new BufferedReader(new FileReader(reservasFile))) {
+                                        // Crear una lista para almacenar las líneas existentes en el archivo
+                                        ArrayList<String> lineasExistente = new ArrayList<>();
+                                        String lineaExistente;
+                                        while ((lineaExistente = reader.readLine()) != null) {
+                                            lineasExistente.add(lineaExistente);
+                                        }
+                            
+                                        try (BufferedWriter writer = new BufferedWriter(new FileWriter(reservasFile, true))) {
+                                            // Recorrer la lista de reservas y escribir cada reserva en el archivo CSV si no existe
+                                            
+                                            
+                                            for (Reserva reserva : usuario.getReservas()) {
+                                                // Verificar si la línea ya existe en el archivo
+                                                if (!lineasExistente.contains(reserva.toString())) {
+                                                    // Escribir la línea CSV en el archivo
+                                                    writer.write(reserva.toString());
+                                                    writer.newLine();  // Agregar un salto de línea para la siguiente reserva
+                                                }
+                                            }
+                                        }
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
                                       
                                     break;
                                     
@@ -178,7 +205,9 @@ public class Kayak{
                                     break;
  
                                 case 3: //modo perfil, cambiar contraseña
-                                    
+                                    for (Reserva reserva : usuario.getReservas()) {
+                                        System.out.println(reserva);
+                                    }
                                     break;
                                 case 4:
                                     loggedIn = false;
@@ -260,19 +289,22 @@ public class Kayak{
     }    
     
     
-    public static void abrirCSV(String nombreString, File nombreFile){
+    public static void abrirCSV(String nombreString, File file){
         if(nombreString == "usuarios.csv"){
             String[] encabezado = {"Nombre", "Password"};
-            crearCSV(nombreFile, encabezado);
+            crearCSV(file, encabezado);
 
+        }else if(nombreString.equals("reservas.csv")){
+            String[] encabezado = {"usuario","fecha-viaje","tipo","cantidad-boletos","aerolinea","numero-tarjeta"};
+            crearCSV(file, encabezado);
         }
     }
 
 
-    public static String[] autenticarUsuario(String usuario, String contrasenia, File nombreFile) {
+    public static String[] autenticarUsuario(String usuario, String contrasenia, File usuariosFile) {
         String contraseniaEncrip = generarHashMD5(contrasenia);
     
-        try (BufferedReader br = new BufferedReader(new FileReader(nombreFile))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(usuariosFile))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] datosUsuario = line.split(",");
@@ -314,10 +346,10 @@ public class Kayak{
             return null;
         }
     }
-    public static void crearCSV(File nombreFile, String[] encabezado) {
+    public static void crearCSV(File file, String[] encabezado) {
         try {
-            if (!nombreFile.exists()) {
-                FileWriter writer = new FileWriter(nombreFile);
+            if (!file.exists()) {
+                FileWriter writer = new FileWriter(file);
     
                 for (int i = 0; i < encabezado.length; i++) {
                     writer.append(encabezado[i]);

@@ -8,7 +8,7 @@ public class Usuario implements Premium {
     int numAsiento,cantMaletas;
     //Se agregó este arraylist para poder mostrar todas las reservas que tenga el usuario
     //no se tenía diseñado pero ya se agregó al documento
-    ArrayList<Reserva> reservas;
+    ArrayList<Reserva> reservas = new ArrayList<Reserva>();
 
     public Usuario(String nombre, String password) {
         this.nombre = nombre;
@@ -84,7 +84,7 @@ public class Usuario implements Premium {
     }
 
     public void setReserva(Reserva reserva){
-        reservas.add(reserva);
+        this.reservas.add(reserva);
     }
 
     public String cambiarPassword(String passwordVieja){
