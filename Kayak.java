@@ -12,7 +12,7 @@ public class Kayak{
         Scanner scanner = new Scanner(System.in);
         boolean contiuar=true, confirmado,loggedIn=false,doReserva;
         Usuario usuario =null;
-        String tipoPlan;
+        String tipoPlan="VIP";
         File usuariosFile = new File("usuarios.csv") , reservasFile = new File("reservas.csv");
         ArrayList<Usuario> usuarios = new ArrayList<Usuario>();
 
@@ -44,7 +44,6 @@ public class Kayak{
                         contiuar=false;
                         break;
                     }
-                    tipoPlan="VIP";
                     System.out.println("Ingrese su nombre de usuario");
                     nombre = scanner.nextLine();
                     System.out.println("Ingrese su contraseña");
@@ -200,14 +199,40 @@ public class Kayak{
                                     break;
                                     
                                 case 2: //confirmacion
-                                
+                                    
+
                                     
                                     break;
  
                                 case 3: //modo perfil, cambiar contraseña
-                                    for (Reserva reserva : usuario.getReservas()) {
-                                        System.out.println(reserva);
+                                    System.out.println("Usted tine el plan " + tipoPlan);
+                                    System.out.println("Bienvenido al cambio de contraseña");
+
+                                    
+                                    try (BufferedReader br = new BufferedReader(new FileReader(usuariosFile))) {
+                                        String line;
+                                        while ((line = br.readLine()) != null) {
+                                            String[] datos = line.split(",");
+                                            
+                                            if (datosUsuario.length == 2) {
+                                                String nombreEnArchivo = datos[0];
+                                                if (nombreEnArchivo.equals(usuario.getNombre())) {
+                                                    continue;
+                                                }else{
+                                                    System.out.println("Lo siento, este usuario no existe");
+                                                    break;
+                                                }
+                                            }
+
+                                        }
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
                                     }
+
+                                    System.out.println("hola");
+
+
+                                    
                                     break;
                                 case 4:
                                     loggedIn = false;
