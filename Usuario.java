@@ -84,7 +84,11 @@ public class Usuario implements Premium {
     }
 
     public void setReserva(Reserva reserva){
-        this.reservas.add(reserva);
+        if(reserva!=null){        
+            this.reservas.add(reserva);
+        }else{
+            this.reservas = null;
+        }
     }
 
     public String cambiarPassword(String passwordVieja){

@@ -10,7 +10,7 @@ public class Kayak{
     public static void main(String[] args) throws IOException {
         int menu=0, opc=0;
         Scanner scanner = new Scanner(System.in);
-        boolean contiuar=true, confirmado,loggedIn=false,doReserva;
+        boolean contiuar=true, confirmado,loggedIn=false,doReserva,validacion=false;
         Usuario usuario =null;
         String tipoPlan="VIP";
         File usuariosFile = new File("usuarios.csv") , reservasFile = new File("reservas.csv");
@@ -188,49 +188,139 @@ public class Kayak{
                                                 if (!lineasExistente.contains(reserva.toString())) {
                                                     // Escribir la línea CSV en el archivo
                                                     writer.write(reserva.toString());
-                                                    writer.newLine();  // Agregar un salto de línea para la siguiente reserva
+                                                    writer.newLine();  
                                                 }
                                             }
                                         }
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
+
+                                    usuario.setReserva(null);
                                       
                                     break;
                                     
                                 case 2: //confirmacion
+                                    System.out.println(usuario.getNombre());
+                                    try (BufferedReader br = new BufferedReader(new FileReader(reservasFile))) {
+                                        String linea;
+                                        boolean esEncabezado = true;  
+                                        boolean definioReserva = false; 
+                                        while ((linea = br.readLine()) != null) {
+                                            if (esEncabezado) {
+                                                esEncabezado = false;
+                                                continue;
+                                            }
+                            
+                                            // Dividir la línea en campos usando la coma como delimitador
+                                            String[] campos = linea.split(",");
+                            
+                                            // Obtener valores de cada campo
+                                            String nombreUsuarioCSV = campos[0];
+                                            if (nombreUsuarioCSV.equals(usuario.getNombre())) {
+                                                
+                                                // Obtener valores de cada campo
+                                                String fechaViaje = campos[1];
+                                                LocalDate fechDate;
+                                                fechDate = LocalDate.parse(fechaViaje);
+                                                String tipo = campos[2];
+                                                int cantBoletos = Integer.parseInt(campos[3]);
+                                                String aerolinea = campos[4];
+                                
+
+                                                usuario.setReserva(new Reserva(fechDate, tipo, aerolinea, cantBoletos, usuario));
+                                                // Indicar que se definió al menos una reserva
+                                                definioReserva = true;
+                                            }
+
+                                        }
+                                        // Mostrar mensaje solo si se definió alguna reserva
+                                        if (definioReserva) {
+                                            System.out.println("Bienvenido a la confirmación de su reserva");
+                                            // Imprimir información de usuarios y reservas
+                                            int i=0;
+                                            for (Reserva reserva : usuario.getReservas()) {
+                                                i++;
+                                                System.out.println("\t" +i+") "+ reserva);
+                                            }
+                                        } else {
+                                            System.out.println("Lo sentimos, necesitamos que defina primero alguna reserva");
+                                            break;
+                                        }
                                     
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+
+                                    System.out.println("Ingrese cual de sus reservas desea confirmar");
+                                    int eleccion = scanner.nextInt();scanner.nextLine();
+
+
+                                    System.out.print("Ingrese el número de tarjeta: ");
+                                    String numeroTarjeta = scanner.nextLine();
+                                    usuario.setNumTarjeta(numeroTarjeta);
+
+                                    System.out.print("Ingrese el número de asiento: ");
+                                    int numeroAsiento = scanner.nextInt();scanner.nextLine();
+
+                                    usuario.setNumAsiento(numeroAsiento);
+
+                                    System.out.print("Ingrese la cantidad de maletas: ");
+                                    int cantidadMaletas = scanner.nextInt();scanner.nextLine();
+
+                                    usuario.setCantMaletas(cantidadMaletas);
+
+                                    System.out.println("Este sería su itineario:");
+                                    System.out.println(usuario.getReservas().get(eleccion-1));
+                                    System.out.println("Numero de asiento: " + usuario.getNumAsiento() );
+                                    System.out.println("Numero de maletas: " + usuario.getCantMaletas() );
+
+                                    
+
 
                                     
                                     break;
  
                                 case 3: //modo perfil, cambiar contraseña
+                                    String contraseniaCambiar;
                                     System.out.println("Usted tine el plan " + tipoPlan);
                                     System.out.println("Bienvenido al cambio de contraseña");
+                                    System.out.println("Ingrese la nueva contraseña");
+                                    contraseniaCambiar = generarHashMD5(scanner.nextLine());
 
-                                    
+                                    if(contraseniaCambiar.equals(usuario.getPassword())){
+                                        System.out.println("Esta era su contraseña anteriormente, si desea cambiarla ingrese otra");
+                                    }
+ 
                                     try (BufferedReader br = new BufferedReader(new FileReader(usuariosFile))) {
+                                        List<String> lines = new ArrayList<>();
+                                    
+                                        // Leer todas las líneas y actualizar la contraseña si es necesario
                                         String line;
                                         while ((line = br.readLine()) != null) {
                                             String[] datos = line.split(",");
-                                            
-                                            if (datosUsuario.length == 2) {
+                                            if (datos.length == 2) {
                                                 String nombreEnArchivo = datos[0];
                                                 if (nombreEnArchivo.equals(usuario.getNombre())) {
-                                                    continue;
-                                                }else{
-                                                    System.out.println("Lo siento, este usuario no existe");
-                                                    break;
+                                                    datos[1] = contraseniaCambiar;
                                                 }
+                                                line = String.join(",", datos);
                                             }
-
+                                            lines.add(line);
+                                        }
+                                    
+                                        // Escribir el contenido actualizado de vuelta al archivo
+                                        try (BufferedWriter wr = new BufferedWriter(new FileWriter(usuariosFile))) {
+                                            for (String updatedLine : lines) {
+                                                wr.write(updatedLine);
+                                                wr.newLine();
+                                            }
                                         }
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
 
-                                    System.out.println("hola");
-
+                                    System.out.println("Cambio de contraseña realizado");
 
                                     
                                     break;
