@@ -3,14 +3,25 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.*;
-
+/**
+ * Clase principal que gestiona las operaciones del sistema Kayak.
+ *
+ * <p>Esta clase contiene el método principal (main) que ejecuta el programa y controla las opciones
+ * del usuario. Se encarga de la gestión de usuarios, reservas y operaciones relacionadas con el sistema de
+ * reservas de vuelo.</p>
+ */
 
 public class Kayak{
-
+    /**
+     * Método principal que inicia la ejecución del programa.
+     *
+     * @param args Argumentos de línea de comandos (no se utilizan en este programa).
+     * @throws IOException Excepción de entrada/salida.
+     */
     public static void main(String[] args) throws IOException {
         int menu=0, opc=0;
         Scanner scanner = new Scanner(System.in);
-        boolean contiuar=true, confirmado,loggedIn=false,doReserva,validacion=false;
+        boolean contiuar=true, confirmado,loggedIn=false,doReserva;
         Usuario usuario =null;
         String tipoPlan="VIP";
         File usuariosFile = new File("usuarios.csv") , reservasFile = new File("reservas.csv");
